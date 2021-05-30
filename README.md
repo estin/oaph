@@ -120,7 +120,7 @@ definitions:
         type: string
 ```
 
-Check [example](example/simple) to serve docs on [ntex](https://github.com/ntex-rs/ntex) stack.
+Check [example](examples/simple/src/main.rs) to serve docs on [ntex](https://github.com/ntex-rs/ntex) stack.
 
 
 ## Thanks to
