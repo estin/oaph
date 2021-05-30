@@ -1,0 +1,16 @@
+[package]
+name = "simple"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ntex = "0.3.14"
+ntex-files = "0.1" 
+oaph = {path = "../../"}
+serde = {version = "1.0", features = ["derive"] }
+schemars = { version = "0.8.3", features = ["preserve_order"] }
+
+[patch.crates-io]
+ntex-files = { git = "https://github.com/ntex-rs/ntex-extras.git" }

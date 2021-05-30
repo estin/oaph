@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info:
+  title: Example
+  version: 1.0.0
+paths:
+  /insert:
+    post:
+      description: some description
+      parameters:
+        {{Request}}
+      responses:
+        '201':
+          description: successfully created
+          content:
+            application/json:
+              {{Response}}
+definitions:
+  {{oaph::definitions}}

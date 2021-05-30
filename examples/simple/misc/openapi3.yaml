@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: oaph example
+  version: 1.0.0
+paths:
+  /search:
+    get:
+      tags:
+      - demo
+      description: demo api
+      parameters:
+        {{SearchQuery}}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                {{SearchResponse}}
+definitions:
+  {{oaph::definitions}}

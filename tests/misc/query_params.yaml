@@ -1,0 +1,21 @@
+- in: query
+  name: extra
+  required: false
+  schema:
+    type: integer
+    format: uint
+    minimum: 0.0
+    nullable: true
+- in: query
+  name: input
+  description: input description
+  required: true
+  schema:
+    type: string
+- in: query
+  name: tags
+  required: true
+  schema:
+    type: array
+    items:
+      type: string
