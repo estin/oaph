@@ -2,17 +2,17 @@
 
 Helps to subtituated query params and schema definitions to openapi3 yaml.
 
-This is feature-less simple lib with no ambitions to support whole openapi 3 specs and cover all cases (at least cover my personal use-cases).
+This is feature-less simple crate with no ambitions to support whole openapi 3 specs and cover all cases (at least cover my personal use-cases).
 
 ```rust
 use serde::{Serialize, Deserialize};
-use schemars::JsonSchema;
-use oaph::OpenApiPlaceHolder;
+use oaph::{OpenApiPlaceHolder, schemars::{self, JsonSchema}};
 
 
 #[allow(dead_code)]
 #[derive(Deserialize, JsonSchema)]
 struct SearchQuery {
+    /// some description for this flag (see https://graham.cool/schemars/examples/6-doc_comments/)
     flag: bool,
 }
 
@@ -30,7 +30,6 @@ struct Item {
     id: usize,
     value: String,
 }
-
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let openapi3_yaml = OpenApiPlaceHolder::new()
@@ -80,6 +79,7 @@ paths:
       parameters:
         - in: query
           name: flag
+          description: some description for this flag (see https://graham.cool/schemars/examples/6-doc_comments/)
           required: true
           schema:
             type: boolean
@@ -95,6 +95,8 @@ paths:
                   - items
                   - success
                 properties:
+                  success:
+                    type: boolean
                   count:
                     type: integer
                     format: uint
@@ -103,8 +105,6 @@ paths:
                     type: array
                     items:
                       $ref: "#/definitions/Item"
-                  success:
-                    type: boolean
 definitions:
   Item:
     type: object
@@ -125,7 +125,7 @@ Check [example](examples/simple/src/main.rs) to serve docs on [ntex](https://git
 
 ## Thanks to
 
- - [serde](https://github.com/serde-rs/serde) and buddies libs
+ - [serde](https://github.com/serde-rs/serde) and buddies crates
  - [schemars](https://github.com/GREsau/schemars)
 
 ## License

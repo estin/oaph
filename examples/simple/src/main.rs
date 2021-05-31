@@ -1,8 +1,7 @@
 use ntex::web::{self, App, HttpRequest, HttpResponse};
 use ntex_files as fs;
-use oaph::OpenApiPlaceHolder;
+use oaph::{OpenApiPlaceHolder, schemars::{self, JsonSchema}};
 use serde::{Serialize, Deserialize};
-use schemars::JsonSchema;
 
 
 #[allow(dead_code)]

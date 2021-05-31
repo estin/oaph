@@ -4,6 +4,9 @@ use std::collections::HashMap;
 use schemars::{gen::SchemaSettings, schema::RootSchema, schema::Schema, JsonSchema, Map};
 use serde::Serialize;
 
+// re-export
+pub use schemars;
+
 pub struct OpenApiPlaceHolder {
     ph: HashMap<String, String>,
     definitions: Map<String, Schema>,

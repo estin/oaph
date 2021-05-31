@@ -26,6 +26,8 @@ paths:
                 - items
                 - success
               properties:
+                success:
+                  type: boolean
                 count:
                   type: integer
                   format: uint
@@ -34,8 +36,6 @@ paths:
                   type: array
                   items:
                     $ref: "#/definitions/Item"
-                success:
-                  type: boolean
 definitions:
   Item:
     type: object
@@ -47,12 +47,12 @@ definitions:
         type: integer
         format: uint
         minimum: 0.0
-      owner:
-        $ref: "#/definitions/User"
       width:
         type: number
         format: double
         nullable: true
+      owner:
+        $ref: "#/definitions/User"
   User:
     type: object
     required:
@@ -64,9 +64,9 @@ definitions:
         type: integer
         format: uint
         minimum: 0.0
+      username:
+        type: string
       tags:
         type: array
         items:
           type: string
-      username:
-        type: string

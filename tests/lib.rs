@@ -1,6 +1,5 @@
 use anyhow::Result;
-use oaph::OpenApiPlaceHolder;
-use schemars::JsonSchema;
+use oaph::{schemars::JsonSchema, OpenApiPlaceHolder};
 use serde::Deserialize;
 
 fn init() {
