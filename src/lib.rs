@@ -164,6 +164,10 @@ impl OpenApiPlaceHolder {
         include_str!("../misc/swagger-ui.html").replace("{{openapi_yaml_url}}", openapi_yaml_url)
     }
 
+    pub fn redoc_ui_html(openapi_yaml_url: &str) -> String {
+        include_str!("../misc/redoc-ui.html").replace("{{openapi_yaml_url}}", openapi_yaml_url)
+    }
+
     pub fn render_to_file<P: AsRef<std::path::Path>>(self, template: &str, path: P) -> Result<()> {
         std::fs::write(path, &self.render_to(template)?)?;
         Ok(())
@@ -174,6 +178,14 @@ impl OpenApiPlaceHolder {
         path: P,
     ) -> Result<()> {
         std::fs::write(path, &Self::swagger_ui_html(openapi_yaml_url))?;
+        Ok(())
+    }
+
+    pub fn redoc_ui_html_to_file<P: AsRef<std::path::Path>>(
+        openapi_yaml_url: &str,
+        path: P,
+    ) -> Result<()> {
+        std::fs::write(path, &Self::redoc_ui_html(openapi_yaml_url))?;
         Ok(())
     }
 }
