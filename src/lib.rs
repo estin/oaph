@@ -74,7 +74,7 @@ impl OpenApiPlaceHolder {
 
                     // remove description from schema block
                     let schema = Self::to_yaml(&schema)?
-                        .split("\n")
+                        .split('\n')
                         .filter(|line| !line.contains("description:"))
                         .collect::<Vec<&str>>()
                         .join("\n");
@@ -107,13 +107,9 @@ impl OpenApiPlaceHolder {
         Ok(self)
     }
 
-    pub fn to_hashmap(self) -> HashMap<String, String> {
-        self.ph
-    }
-
     fn with_indent(indent: &str, value: &str) -> String {
         value
-            .split("\n")
+            .split('\n')
             .enumerate()
             .map(|(index, line)| {
                 // don't indent first line
@@ -139,7 +135,7 @@ impl OpenApiPlaceHolder {
         for (k, v) in self.ph.iter() {
             // split to lines
             result = result
-                .split("\n")
+                .split('\n')
                 .map(|line| {
                     // find placeholder on each line
                     let pattern = format!("{{{{{}}}}}", k);
@@ -151,7 +147,7 @@ impl OpenApiPlaceHolder {
                             .trim_end()
                             .to_owned()
                     } else {
-                        return line.to_owned();
+                        line.to_owned()
                     }
                 })
                 .collect::<Vec<String>>()
@@ -187,6 +183,12 @@ impl OpenApiPlaceHolder {
     ) -> Result<()> {
         std::fs::write(path, &Self::redoc_ui_html(openapi_yaml_url))?;
         Ok(())
+    }
+}
+
+impl Default for OpenApiPlaceHolder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
