@@ -43,6 +43,11 @@ impl OpenApiPlaceHolder {
             .to_owned())
     }
 
+    pub fn substitute(mut self, name: &str, value: &str) -> Self {
+        self.ph.insert(name.to_owned(), value.to_owned());
+        self
+    }
+
     pub fn query_params<T: JsonSchema>(mut self, name: &str) -> Result<Self> {
         let root_schema = self.describe_struct::<T>();
         let parameters = match root_schema.schema.object {
@@ -156,12 +161,16 @@ impl OpenApiPlaceHolder {
         Ok(result)
     }
 
-    pub fn swagger_ui_html(openapi_yaml_url: &str) -> String {
-        include_str!("../misc/swagger-ui.html").replace("{{openapi_yaml_url}}", openapi_yaml_url)
+    pub fn swagger_ui_html(openapi_yaml_url: &str, title: &str) -> String {
+        include_str!("../misc/swagger-ui.html")
+            .replace("{{openapi_yaml_url}}", openapi_yaml_url)
+            .replace("{{title}}", title)
     }
 
-    pub fn redoc_ui_html(openapi_yaml_url: &str) -> String {
-        include_str!("../misc/redoc-ui.html").replace("{{openapi_yaml_url}}", openapi_yaml_url)
+    pub fn redoc_ui_html(openapi_yaml_url: &str, title: &str) -> String {
+        include_str!("../misc/redoc-ui.html")
+            .replace("{{openapi_yaml_url}}", openapi_yaml_url)
+            .replace("{{title}}", title)
     }
 
     pub fn render_to_file<P: AsRef<std::path::Path>>(self, template: &str, path: P) -> Result<()> {
@@ -171,17 +180,19 @@ impl OpenApiPlaceHolder {
 
     pub fn swagger_ui_html_to_file<P: AsRef<std::path::Path>>(
         openapi_yaml_url: &str,
+        title: &str,
         path: P,
     ) -> Result<()> {
-        std::fs::write(path, &Self::swagger_ui_html(openapi_yaml_url))?;
+        std::fs::write(path, &Self::swagger_ui_html(openapi_yaml_url, title))?;
         Ok(())
     }
 
     pub fn redoc_ui_html_to_file<P: AsRef<std::path::Path>>(
         openapi_yaml_url: &str,
+        title: &str,
         path: P,
     ) -> Result<()> {
-        std::fs::write(path, &Self::redoc_ui_html(openapi_yaml_url))?;
+        std::fs::write(path, &Self::redoc_ui_html(openapi_yaml_url, title))?;
         Ok(())
     }
 }

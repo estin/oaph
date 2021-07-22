@@ -66,10 +66,10 @@ fn generate_openapi_files() -> Result<(), Box<dyn std::error::Error>> {
         .render_to_file(include_str!("../misc/openapi3.yaml"), std::env::temp_dir().join("openapi3.yaml"))?;
 
     // render swagger ui html to temporary file
-    OpenApiPlaceHolder::swagger_ui_html_to_file("/openapi3.yaml", std::env::temp_dir().join("swagger-ui.html"))?;
+    OpenApiPlaceHolder::swagger_ui_html_to_file("/openapi3.yaml", "OAPH example", std::env::temp_dir().join("swagger-ui.html"))?;
 
     // render redoc ui html to temporary file
-    OpenApiPlaceHolder::redoc_ui_html_to_file("/openapi3.yaml", std::env::temp_dir().join("redoc-ui.html"))?;
+    OpenApiPlaceHolder::redoc_ui_html_to_file("/openapi3.yaml", "OAPH example", std::env::temp_dir().join("redoc-ui.html"))?;
 
     Ok(())
 }

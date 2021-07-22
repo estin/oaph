@@ -7,6 +7,19 @@ fn init() {
 }
 
 #[test]
+fn substitute() -> Result<()> {
+    init();
+
+    assert_eq!(
+        "hello world!",
+        OpenApiPlaceHolder::new()
+            .substitute("ph", "world")
+            .render_to("hello {{ph}}!")?
+    );
+    Ok(())
+}
+
+#[test]
 fn query_params() -> Result<()> {
     init();
 
