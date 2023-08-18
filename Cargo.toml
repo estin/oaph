@@ -1,7 +1,15 @@
 [package]
 name = "oaph"
 version = "0.1.0"
-edition = "2018"
+authors = ["oaph contributors"]
+description = "Helps to subtituated query params and schema definitions to openapi3 yaml"
+readme = "README.md"
+keywords = ["openapi3"]
+repository = "https://github.com/estin/oaph.git"
+documentation = "https://docs.rs/oaph/"
+categories = ["template-engine", "development-tools"]
+license = "MIT"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
