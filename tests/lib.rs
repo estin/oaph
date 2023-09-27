@@ -2,14 +2,8 @@ use anyhow::Result;
 use oaph::{schemars::JsonSchema, OpenApiPlaceHolder};
 use serde::Deserialize;
 
-fn init() {
-    let _ = env_logger::builder().is_test(true).try_init();
-}
-
 #[test]
 fn substitute() -> Result<()> {
-    init();
-
     assert_eq!(
         "hello world!",
         OpenApiPlaceHolder::new()
@@ -21,8 +15,6 @@ fn substitute() -> Result<()> {
 
 #[test]
 fn query_params() -> Result<()> {
-    init();
-
     #[allow(dead_code)]
     #[derive(Deserialize, JsonSchema)]
     struct Query {
@@ -43,8 +35,6 @@ fn query_params() -> Result<()> {
 
 #[test]
 fn schema() -> Result<()> {
-    init();
-
     #[allow(dead_code)]
     #[derive(Deserialize, JsonSchema)]
     struct Request {

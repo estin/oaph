@@ -10,7 +10,7 @@ paths:
         title: Request
         type: object
         required:
-          - username
+        - username
         properties:
           username:
             type: string
@@ -22,9 +22,9 @@ paths:
               title: Response
               type: object
               required:
-                - count
-                - items
-                - success
+              - count
+              - items
+              - success
               properties:
                 success:
                   type: boolean
@@ -35,13 +35,13 @@ paths:
                 items:
                   type: array
                   items:
-                    $ref: "#/definitions/Item"
+                    $ref: '#/definitions/Item'
 definitions:
   Item:
     type: object
     required:
-      - id
-      - owner
+    - id
+    - owner
     properties:
       id:
         type: integer
@@ -52,13 +52,13 @@ definitions:
         format: double
         nullable: true
       owner:
-        $ref: "#/definitions/User"
+        $ref: '#/definitions/User'
   User:
     type: object
     required:
-      - id
-      - tags
-      - username
+    - id
+    - tags
+    - username
     properties:
       id:
         type: integer

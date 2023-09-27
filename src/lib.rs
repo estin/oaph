@@ -148,7 +148,7 @@ impl OpenApiPlaceHolder {
                         // calc indent
                         let (indent, _) = line.split_at(position);
 
-                        line.replace(&pattern, &Self::with_indent(indent, &v))
+                        line.replace(&pattern, &Self::with_indent(indent, v))
                             .trim_end()
                             .to_owned()
                     } else {
@@ -174,7 +174,7 @@ impl OpenApiPlaceHolder {
     }
 
     pub fn render_to_file<P: AsRef<std::path::Path>>(self, template: &str, path: P) -> Result<()> {
-        std::fs::write(path, &self.render_to(template)?)?;
+        std::fs::write(path, self.render_to(template)?)?;
         Ok(())
     }
 
@@ -183,7 +183,7 @@ impl OpenApiPlaceHolder {
         title: &str,
         path: P,
     ) -> Result<()> {
-        std::fs::write(path, &Self::swagger_ui_html(openapi_yaml_url, title))?;
+        std::fs::write(path, Self::swagger_ui_html(openapi_yaml_url, title))?;
         Ok(())
     }
 
@@ -192,7 +192,7 @@ impl OpenApiPlaceHolder {
         title: &str,
         path: P,
     ) -> Result<()> {
-        std::fs::write(path, &Self::redoc_ui_html(openapi_yaml_url, title))?;
+        std::fs::write(path, Self::redoc_ui_html(openapi_yaml_url, title))?;
         Ok(())
     }
 }
