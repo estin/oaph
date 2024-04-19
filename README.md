@@ -1,8 +1,8 @@
 # OAPH
 
-Helps to subtituated query params and schema definitions to openapi3 yaml.
+Helps to subtituate query params and schema definitions to openapi3/asyncapi yaml.
 
-This is feature-less simple crate with no ambitions to support whole openapi 3 specs and cover all cases (at least cover my personal use-cases).
+This is feature-less simple crate with no ambitions to support whole openapi3/asyncapi specs and cover all cases (at least cover my personal use-cases).
 
 ```rust
 use serde::{Serialize, Deserialize};
