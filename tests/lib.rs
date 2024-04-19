@@ -1,5 +1,4 @@
-use anyhow::Result;
-use oaph::{schemars::JsonSchema, OpenApiPlaceHolder};
+use oaph::{schemars::JsonSchema, OpenApiPlaceHolder, Result};
 use serde::Deserialize;
 
 #[test]

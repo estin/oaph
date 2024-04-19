@@ -1,32 +1,86 @@
-use anyhow::{bail, Result};
 use std::collections::HashMap;
 
-use schemars::{gen::SchemaSettings, schema::RootSchema, schema::Schema, JsonSchema, Map};
+use schemars::{
+    gen::{SchemaGenerator, SchemaSettings},
+    schema::RootSchema,
+    schema::Schema,
+    JsonSchema, Map,
+};
 use serde::Serialize;
 
 // re-export
 pub use schemars;
 
+// Change the alias to use `Box<dyn error::Error>`.
+pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+#[derive(Debug, Clone)]
+struct OpenApiPlaceHolderError(String);
+
+impl std::fmt::Display for OpenApiPlaceHolderError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "OpenApiPlaceHolderError: {}", self.0)
+    }
+}
+
+impl std::error::Error for OpenApiPlaceHolderError {}
+
+impl OpenApiPlaceHolderError {
+    pub fn new(message: &str) -> Self {
+        OpenApiPlaceHolderError(message.to_string())
+    }
+}
+
+pub struct OpenApiPlaceHolderBuilder {
+    pub schema_settings: SchemaSettings,
+}
+
 pub struct OpenApiPlaceHolder {
     ph: HashMap<String, String>,
     definitions: Map<String, Schema>,
+    schema_generator: SchemaGenerator,
 }
 
-impl OpenApiPlaceHolder {
+impl Default for OpenApiPlaceHolderBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl OpenApiPlaceHolderBuilder {
     pub fn new() -> Self {
-        OpenApiPlaceHolder {
-            ph: HashMap::new(),
-            definitions: Map::new(),
+        Self {
+            schema_settings: SchemaSettings::draft07().with(|s| {
+                s.option_nullable = true;
+                s.option_add_null_type = false;
+            }),
         }
     }
 
+    pub fn with_schema_settings(self, schema_settings: SchemaSettings) -> Self {
+        Self { schema_settings }
+    }
+
+    pub fn build(self) -> OpenApiPlaceHolder {
+        OpenApiPlaceHolder {
+            ph: HashMap::new(),
+            definitions: Map::new(),
+            schema_generator: self.schema_settings.into_generator(),
+        }
+    }
+}
+
+impl OpenApiPlaceHolder {
+    pub fn builder() -> OpenApiPlaceHolderBuilder {
+        OpenApiPlaceHolderBuilder::new()
+    }
+
+    pub fn new() -> Self {
+        Self::builder().build()
+    }
+
     fn describe_struct<T: JsonSchema>(&mut self) -> RootSchema {
-        let settings = SchemaSettings::draft07().with(|s| {
-            s.option_nullable = true;
-            s.option_add_null_type = false;
-        });
-        let gen = settings.into_generator();
-        let root_schema = gen.into_root_schema_for::<T>();
+        let root_schema = self.schema_generator.clone().into_root_schema_for::<T>();
 
         // populate definitions
         for (k, v) in root_schema.clone().definitions {
@@ -95,7 +149,11 @@ impl OpenApiPlaceHolder {
 
                 result.join("\n")
             }
-            _ => bail!("Only object type supported"),
+            _ => {
+                return Err(Box::new(OpenApiPlaceHolderError::new(
+                    "Only object type supported",
+                )))
+            }
         };
 
         self.ph.insert(name.to_owned(), parameters);
