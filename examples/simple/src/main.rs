@@ -1,4 +1,4 @@
-use ntex::web::{self, App, HttpRequest, HttpResponse};
+use ntex::{web::{self, App, HttpRequest, HttpResponse}, SharedCfg};
 use ntex_files as fs;
 use oaph::{
     schemars::{self, JsonSchema},
@@ -89,7 +89,7 @@ fn generate_openapi_files() -> Result<(), Box<dyn std::error::Error>> {
 async fn main() -> std::io::Result<()> {
     generate_openapi_files().expect("On generate openapi files");
 
-    let fut = web::server(move || {
+    let fut = web::server(async move |_| {
         App::new().service((
             web::resource("/search").to(search),
             // serve openapi3 yaml and ui from files
@@ -98,7 +98,7 @@ async fn main() -> std::io::Result<()> {
             fs::Files::new("/redoc", std::env::temp_dir()).index_file("redoc-ui.html"),
         ))
     })
-    .bind("127.0.0.1:8080")?
+    .bind("127.0.0.1:8080", SharedCfg::default())?
     .run();
 
     println!("swagger-ui: http://127.0.0.1:8080/swagger");

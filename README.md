@@ -90,34 +90,34 @@ paths:
               schema:
                 title: SearchResponse
                 type: object
-                required:
-                  - count
-                  - items
-                  - success
                 properties:
                   success:
                     type: boolean
                   count:
                     type: integer
                     format: uint
-                    minimum: 0.0
+                    minimum: 0
                   items:
                     type: array
                     items:
                       $ref: "#/definitions/Item"
+                required:
+                - success
+                - count
+                - items
 definitions:
   Item:
     type: object
-    required:
-      - id
-      - value
     properties:
       id:
         type: integer
         format: uint
-        minimum: 0.0
+        minimum: 0
       value:
         type: string
+    required:
+    - id
+    - value
 ```
 
 Check [example](examples/simple/src/main.rs) to serve docs on [ntex](https://github.com/ntex-rs/ntex) stack.

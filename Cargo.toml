@@ -1,18 +1,19 @@
 [package]
 name = "oaph"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["oaph contributors"]
 description = "Helps to subtituate query params and schema definitions to openapi3/asyncapi yaml"
 readme = "README.md"
-keywords = ["openapi3", "asyncapi"]
+keywords = ["asyncapi", "openapi3"]
 repository = "https://github.com/estin/oaph.git"
 documentation = "https://docs.rs/oaph/"
-categories = ["template-engine", "development-tools"]
+categories = ["development-tools", "template-engine"]
 license = "MIT"
 edition = "2021"
 resolver = "2"
 
 [dependencies]
+schemars = { version = "1", features = ["preserve_order"] }
 serde = { version = "1.0", features = ["derive"] }
-schemars = { version = "0.8", features = ["preserve_order"] }
-serde_yaml = "0.9" # TODO change to maintend alternative
+serde_json = { version = "1", features = ["preserve_order"] }
+serde-saphyr = { version = "2", default-features = false, features = ["serialize"] }

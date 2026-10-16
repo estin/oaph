@@ -6,7 +6,7 @@ edition = "2021"
 resolver = "2"
 
 [dependencies]
-ntex = { version = "1.2", features = ["tokio"] }
-ntex-files = "1.0" 
+ntex = { version = "4.3", features = ["tokio"] }
+ntex-files = "4.1"
 oaph = {path = "../../"}
 serde = {version = "1.0", features = ["derive"] }

@@ -1,12 +1,10 @@
 use std::collections::HashMap;
 
-use schemars::{
-    gen::{SchemaGenerator, SchemaSettings},
-    schema::RootSchema,
-    schema::Schema,
-    JsonSchema, Map,
-};
+use schemars::generate::SchemaSettings;
+use schemars::transform::AddNullable;
+use schemars::{JsonSchema, Schema, SchemaGenerator};
 use serde::Serialize;
+use serde_json::{Map, Value};
 
 // re-export
 pub use schemars;
@@ -37,7 +35,7 @@ pub struct OpenApiPlaceHolderBuilder {
 
 pub struct OpenApiPlaceHolder {
     ph: HashMap<String, String>,
-    definitions: Map<String, Schema>,
+    definitions: Map<String, Value>,
     schema_generator: SchemaGenerator,
 }
 
@@ -50,10 +48,10 @@ impl Default for OpenApiPlaceHolderBuilder {
 impl OpenApiPlaceHolderBuilder {
     pub fn new() -> Self {
         Self {
-            schema_settings: SchemaSettings::draft07().with(|s| {
-                s.option_nullable = true;
-                s.option_add_null_type = false;
-            }),
+            // Same semantics as the pre-1.0 `option_nullable` / `option_add_null_type`
+            // settings: annotations like `nullable: true` instead of null type arrays,
+            // while keeping draft-07 `$ref` paths.
+            schema_settings: SchemaSettings::draft07().with_transform(AddNullable::default()),
         }
     }
 
@@ -79,19 +77,34 @@ impl OpenApiPlaceHolder {
         Self::builder().build()
     }
 
-    fn describe_struct<T: JsonSchema>(&mut self) -> RootSchema {
-        let root_schema = self.schema_generator.clone().into_root_schema_for::<T>();
+    fn describe_struct<T: JsonSchema>(&mut self) -> Schema {
+        let generator = self.schema_generator.clone();
 
-        // populate definitions
-        for (k, v) in root_schema.clone().definitions {
-            self.definitions.insert(k, v);
+        let definitions_path = generator
+            .settings()
+            .definitions_path
+            .trim_start_matches('#')
+            .trim_end_matches('/')
+            .to_owned();
+
+        let mut schema = generator.into_root_schema_for::<T>();
+
+        // move the generated definitions from the root schema
+        // to the shared definitions list
+        if let Some(definitions) = Self::take_definitions_at(&mut schema, &definitions_path) {
+            for (name, definition) in definitions {
+                self.definitions.insert(name, definition);
+            }
         }
 
-        root_schema
+        // the old RootSchema meta_schema was never rendered
+        schema.remove("$schema");
+
+        schema
     }
 
     fn to_yaml(schema: &impl Serialize) -> Result<String> {
-        Ok(serde_yaml::to_string(schema)?
+        Ok(serde_saphyr::to_string(schema)?
             .replace("---\n", "")
             .trim()
             .to_owned())
@@ -103,69 +116,83 @@ impl OpenApiPlaceHolder {
     }
 
     pub fn query_params<T: JsonSchema>(mut self, name: &str) -> Result<Self> {
-        let root_schema = self.describe_struct::<T>();
-        let parameters = match root_schema.schema.object {
-            Some(object) => {
-                let mut result: Vec<String> = Vec::new();
+        let mut root_schema = self.describe_struct::<T>();
 
-                for (name, schema) in object.properties.iter() {
-                    let (required, description) = match schema {
-                        Schema::Object(o) => (
-                            if o.extensions.get("nullable").is_some() {
-                                "false"
-                            } else {
-                                "true"
-                            },
-                            if let Some(metadata) = o.metadata.as_ref() {
-                                metadata.description.as_ref()
-                            } else {
-                                None
-                            },
-                        ),
-                        _ => ("false", None),
-                    };
-
-                    let description_entry = if let Some(desc) = description {
-                        format!("  description: {}\n", desc.trim()).to_string()
-                    } else {
-                        "".to_string()
-                    };
-
-                    // remove description from schema block
-                    let schema = Self::to_yaml(&schema)?
-                        .split('\n')
-                        .filter(|line| !line.contains("description:"))
-                        .collect::<Vec<&str>>()
-                        .join("\n");
-
-                    result.push(format!(
-                        "- in: query\n  name: {name}\n{description}  required: {required}\n  schema:\n    {schema}",
-                        name=name,
-                        required=required,
-                        description=description_entry,
-                        schema=Self::with_indent("    ", &schema),
-                    ))
-                }
-
-                result.join("\n")
-            }
-            _ => {
-                return Err(Box::new(OpenApiPlaceHolderError::new(
-                    "Only object type supported",
-                )))
-            }
+        let Some(Value::Object(properties)) = root_schema.remove("properties") else {
+            return Err(Box::new(OpenApiPlaceHolderError::new(
+                "Only object type supported",
+            )));
         };
 
-        self.ph.insert(name.to_owned(), parameters);
+        let mut result: Vec<String> = Vec::new();
+
+        for (property_name, schema) in properties {
+            let (required, description) = match &schema {
+                Value::Object(o) => (
+                    if o.get("nullable").is_some() {
+                        "false"
+                    } else {
+                        "true"
+                    },
+                    o.get("description").and_then(|v| v.as_str()),
+                ),
+                _ => ("false", None),
+            };
+
+            let description_entry = if let Some(desc) = description {
+                format!("  description: {}\n", desc.trim()).to_string()
+            } else {
+                "".to_string()
+            };
+
+            // do not include the description in the schema block,
+            // it is written right above the schema entry
+            let mut schema_block = schema;
+            if let Value::Object(properties) = &mut schema_block {
+                properties.remove("description");
+            }
+
+            result.push(format!(
+                "- in: query\n  name: {name}\n{description}  required: {required}\n  schema:\n    {schema}",
+                name=property_name,
+                required=required,
+                description=description_entry,
+                schema=Self::with_indent("    ", &Self::to_yaml(&schema_block)?),
+            ))
+        }
+
+        self.ph.insert(name.to_owned(), result.join("\n"));
 
         Ok(self)
+    }
+
+    // take a map out of the schema by a slash-separated path,
+    // for example the `definitions` or `$defs` schema property
+    fn take_definitions_at(schema: &mut Schema, path: &str) -> Option<Map<String, Value>> {
+        let mut keys: Vec<String> = path
+            .trim_matches('/')
+            .split('/')
+            .filter(|x| !x.is_empty())
+            .map(|x| x.replace("~1", "/").replace("~0", "~"))
+            .collect();
+        let last = keys.pop()?;
+
+        let mut object = schema.as_object_mut()?;
+        for key in keys {
+            object = object.get_mut(&key)?.as_object_mut()?;
+        }
+
+        match object.remove(&last)? {
+            Value::Object(definitions) => Some(definitions),
+            _ => None,
+        }
     }
 
     pub fn schema<T: JsonSchema>(mut self, name: &str) -> Result<Self> {
         let root_schema = self.describe_struct::<T>();
 
         self.ph
-            .insert(name.to_owned(), Self::to_yaml(&root_schema.schema)?);
+            .insert(name.to_owned(), Self::to_yaml(&root_schema)?);
 
         Ok(self)
     }
