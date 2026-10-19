@@ -1,6 +1,6 @@
 [package]
 name = "oaph"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["oaph contributors"]
 description = "Helps to subtituate query params and schema definitions to openapi3/asyncapi yaml"
 readme = "README.md"
