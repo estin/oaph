@@ -33,6 +33,24 @@ fn query_params() -> Result<()> {
 }
 
 #[test]
+fn query_params_multiline_description() -> Result<()> {
+    #[allow(dead_code)]
+    #[derive(Deserialize, JsonSchema)]
+    struct Query {
+        /// first line: `a = b`
+        /// second line # not a comment
+        k: f32,
+    }
+
+    let rendered = OpenApiPlaceHolder::new()
+        .query_params::<Query>("Query")?
+        .render_to("{{Query}}")?;
+    assert!(rendered
+        .contains("  description: \"first line: `a = b`\\nsecond line # not a comment\"\n"));
+    Ok(())
+}
+
+#[test]
 fn schema() -> Result<()> {
     #[allow(dead_code)]
     #[derive(Deserialize, JsonSchema)]

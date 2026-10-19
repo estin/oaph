@@ -140,7 +140,8 @@ impl OpenApiPlaceHolder {
             };
 
             let description_entry = if let Some(desc) = description {
-                format!("  description: {}\n", desc.trim()).to_string()
+                // quoted, so multi-line or special characters keep the YAML valid
+                format!("  description: {}\n", serde_json::to_string(desc.trim())?)
             } else {
                 "".to_string()
             };

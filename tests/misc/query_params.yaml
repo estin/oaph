@@ -1,6 +1,6 @@
 - in: query
   name: input
-  description: input description
+  description: "input description"
   required: true
   schema:
     type: string
